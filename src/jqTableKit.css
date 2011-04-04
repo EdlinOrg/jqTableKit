@@ -1,0 +1,15 @@
+table.sortable tr.rowodd {
+	background-color: #FFF;
+}
+
+table.sortable tr.roweven {
+	background-color: #F2F2F2;
+}
+
+table.sortable th.sortasc,table.sortable td.sortasc {
+	background-color: #DDFFAC;
+}
+
+table.sortable th.sortdesc,table.sortable td.sortdesc {
+	background-color: #B9DDFF;
+}

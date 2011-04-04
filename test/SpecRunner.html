@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Jasmine Test Runner</title>
+  <link rel="stylesheet" type="text/css" href="lib/jasmine-1.0.2/jasmine.css">
+  <script type="text/javascript" src="lib/jasmine-1.0.2/jasmine.js"></script>
+  <script type="text/javascript" src="lib/jasmine-1.0.2/jasmine-html.js"></script>
+
+  <!-- include source files here... -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
+  <script type="text/javascript" src="../src/jqTableKit.js"></script>
+
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="spec/jqTableKitSpec.js"></script>
+
+</head>
+<body>
+
+<script type="text/javascript">
+  jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+  jasmine.getEnv().execute();
+</script>
+
+
+<pre>
+Note: since the unit tests are testing private functions directly,
+you have to remove "var" in front of the functions in jqTableKit
+to be able to execute the unit tests
+
+e.g.
+ var detectType = function(data){
+needs to be modfied to
+ detectType = function(data){
+</pre>
+</body>
+</html>

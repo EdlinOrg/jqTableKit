@@ -1,0 +1,470 @@
+/*
+ * Copyright (c) 2011 Carl Asman http://www.edlin.org/
+ * Version: 0.1 2011-04-03
+ * 
+ * jqTableKit's aim is to provide the same functionality, in the same way
+ * as TableKit, but using jQuery instead of prototype
+ * 
+ * The original TableKit is Copyright Andrew Tetlaw & Millstream Web Software
+ * http://www.millstream.com.au/view/code/tablekit/
+ * 
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ */
+
+(function($) {
+	
+	/**
+	 * based on the typeIndex it determines how to format the data
+	 */
+	 var formatKey = function(data, typeIndex) {
+		switch (typeIndex) {
+		case 0:
+			// date-iso
+			return formatDateIso(data);
+		case 1:
+			// date
+			if (data) {
+				var pattern = /^(?:sun|mon|tue|wed|thu|fri|sat)\,\s\d{1,2}\s(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s\d{4}(?:\s\d{2}\:\d{2}(?:\:\d{2})?(?:\sGMT(?:[+-]\d{4})?)?)?/i; //Mon, 18 Dec 1995 17:28:35 GMT
+				if (!data.match(pattern)) {
+					return 0;
+				}
+				return new Date(data);
+			} else {
+				return 0;
+			}
+		case 2:
+			// date-eu
+			return formatDateEu(data);
+		case 3:
+			// date-au
+			return formatDateAu(data);
+		case 4:
+			// time
+			var d = new Date();
+			var ds = d.getMonth() + "/" + d.getDate() + "/" + d.getFullYear() + " ";
+			return new Date( ds + data);
+		case 5:
+			// currency
+			return data ? parseFloat(data.replace(/[^-\d\.]/g, '')) : 0;
+		case 6:
+			// datasize
+			return formatDatasize(data);
+		case 7:
+			// number
+			data = parseFloat(data.replace(/^.*?([-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?).*$/,"$1"));
+			return isNaN(data) ? 0 : data;
+		case 8:
+			// casesensitivetext
+			return data;
+		case 9:
+			return data.toUpperCase();
+		default:
+			return 0;
+		}
+	};
+
+	var formatDateEu = function(v) {
+		var pattern = /^\d{1,2}-\d{1,2}-\d{4}/i; //31-12-1999, 5-5-1999
+		if (!v.match(pattern)) {
+			return 0;
+		}
+		var r = v.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
+		var yr_num = r[3];
+		var mo_num = parseInt(r[2], 10) - 1;
+		var day_num = r[1];
+		return new Date(yr_num, mo_num, day_num).valueOf();
+	}
+
+	var formatDateIso = function(v) {
+
+		var pattern = /[\d]{4}-[\d]{2}-[\d]{2}(?:T[\d]{2}\:[\d]{2}(?:\:[\d]{2}(?:\.[\d]+)?)?(Z|([-+][\d]{2}:[\d]{2})?)?)?/; // 2005-03-26T19:51:34Z
+
+		if (!v.match(pattern)) {
+			return 0;
+		}
+		var d = v
+				.match(/([\d]{4})(-([\d]{2})(-([\d]{2})(T([\d]{2}):([\d]{2})(:([\d]{2})(\.([\d]+))?)?(Z|(([-+])([\d]{2}):([\d]{2})))?)?)?)?/);
+		var offset = 0;
+		var date = new Date(d[1], 0, 1);
+		if (d[3]) {
+			date.setMonth(d[3] - 1);
+		}
+		if (d[5]) {
+			date.setDate(d[5]);
+		}
+		if (d[7]) {
+			date.setHours(d[7]);
+		}
+		if (d[8]) {
+			date.setMinutes(d[8]);
+		}
+		if (d[10]) {
+			date.setSeconds(d[10]);
+		}
+		if (d[12]) {
+			date.setMilliseconds(Number("0." + d[12]) * 1000);
+		}
+		if (d[14]) {
+			offset = (Number(d[16]) * 60) + Number(d[17]);
+			offset *= ((d[15] === '-') ? 1 : -1);
+		}
+		offset -= date.getTimezoneOffset();
+		if (offset !== 0) {
+			var time = (Number(date) + (offset * 60 * 1000));
+			date.setTime(Number(time));
+		}
+		return date.valueOf();
+
+	}
+
+	var formatDateAu = function(v) {
+			var pattern = /^\d{2}\/\d{2}\/\d{4}\s?(?:\d{1,2}\:\d{2}(?:\:\d{2})?\s?[a|p]?m?)?/i; //25/12/2006 05:30:00 PM
+						
+			if (!v.match(pattern)) {
+				return 0;
+			}
+			var r = v.match(/^(\d{2})\/(\d{2})\/(\d{4})\s?(?:(\d{1,2})\:(\d{2})(?:\:(\d{2}))?\s?([a|p]?m?))?/i);
+			var yr_num = r[3];
+			var mo_num = parseInt(r[2],10)-1;
+			var day_num = r[1];
+			var hr_num = r[4] ? r[4] : 0;
+			if(r[7]) {
+				var chr = parseInt(r[4],10);
+				if(r[7].toLowerCase().indexOf('p') !== -1) {
+					hr_num = chr < 12 ? chr + 12 : chr;
+				} else if(r[7].toLowerCase().indexOf('a') !== -1) {
+					hr_num = chr < 12 ? chr : 0;
+				}
+			} 
+			var min_num = r[5] ? r[5] : 0;
+			var sec_num = r[6] ? r[6] : 0;
+			return new Date(yr_num, mo_num, day_num, hr_num, min_num, sec_num, 0).valueOf();
+		}
+
+	var formatDatasize = function(v) {
+		var r = v.match(/^([-+]?[\d]*\.?[\d]+([eE][-+]?[\d]+)?)\s?([k|m|g|t]?b)?/i);
+		var b = r[1] ? Number(r[1]).valueOf() : 0;
+		var m = r[3] ? r[3].substr(0, 1).toLowerCase() : '';
+		var result = b;
+		switch (m) {
+		case 'k':
+			result = b * 1024;
+			break;
+		case 'm':
+			result = b * 1024 * 1024;
+			break;
+		case 'g':
+			result = b * 1024 * 1024 * 1024;
+			break;
+		case 't':
+			result = b * 1024 * 1024 * 1024 * 1024;
+			break;
+		}
+		return result;
+	}
+
+	var functionSortTmp = function(a, b, index) {
+		var sortKey = 'sortKey' + index;
+		if ($(a).data(sortKey) < $(b).data(sortKey)) {
+			return -1;
+		}
+		if ($(a).data(sortKey) > $(b).data(sortKey)) {
+			return 1;
+		}
+		return 0;
+	};
+
+	/**
+	 * Auto detect the type
+	 */
+	var detectType = function(data){
+		var typeIndex=-1;
+		for (var i=0;i< sortLength;i++){
+			switch (sortTypes[i]) {
+			case 'date-iso':
+				if(data.match(typePatterns['date-iso'])){
+					return i;
+				}
+				break;	
+			case 'date':
+				if(data.match(typePatterns['date'])){
+					return i;
+				}
+				break;	
+			case 'date-eu':
+				if(data.match(typePatterns['date-eu'])){
+					return i;
+				}
+				break;	
+			case 'date-au':
+				if(data.match(typePatterns['date-au'])){
+					return i;
+				}
+				break;	
+			case 'time':
+				if(data.match(typePatterns['time'])){
+					return i;
+				}
+				break;
+			case 'currency':
+				if(data.match(typePatterns['currency'])){
+					return i;
+				}
+				break;
+			case 'datasize':
+				if(data.match(typePatterns['datasize'])){
+					return i;
+				}
+				break;
+			case 'number':
+				if(data.match(typePatterns['number'])){
+					return i;
+				}
+				break;
+			default:
+			}
+		}
+		if(typeIndex <0){
+			//default to text
+			return 9;			
+		}
+		return typeIndex;
+	}
+		
+	// determine the header type for each column
+	var sortTypes = [ 'date-iso', 'date', 'date-eu', 'date-au', 'time', 'currency', 'datasize', 'number', 'casesensitivetext', 'text' ];
+	//pattern used for automatic detections
+	var typePatterns = {	'date-iso' : /[\d]{4}-[\d]{2}-[\d]{2}(?:T[\d]{2}\:[\d]{2}(?:\:[\d]{2}(?:\.[\d]+)?)?(Z|([-+][\d]{2}:[\d]{2})?)?)?/, // 2005-03-26T19:51:34Z
+												'date': /^(?:sun|mon|tue|wed|thu|fri|sat)\,\s\d{1,2}\s(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s\d{4}(?:\s\d{2}\:\d{2}(?:\:\d{2})?(?:\sGMT(?:[+-]\d{4})?)?)?/i, //Mon, 18 Dec 1995 17:28:35 GMT
+												'date-eu': /^\d{1,2}-\d{1,2}-\d{4}/i,
+												'date-au': /^\d{2}\/\d{2}\/\d{4}\s?(?:\d{1,2}\:\d{2}(?:\:\d{2})?\s?[a|p]?m?)?/i,
+												'time': /^\d{1,2}\:\d{2}(?:\:\d{2})?(?:\s[a|p]m)?$/i,
+												'currency': /(^[$¥£€¤])|([€]$)/, // dollar,pound,yen,euro,generic currency symbol
+												'datasize': /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?\s?[k|m|g|t]b$/i, 
+												'number': /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/ };
+	var sortLength = sortTypes.length;
+
+	var methods = {
+		init : function(options) {
+
+			return this.each(function() {
+
+				var headerTypeIndexes = [];
+
+				// Determine the types of each row
+				var headerRows = $(this).children('thead').children('tr');
+				
+				var ignoreFirstRow=false;
+
+				if (0 == headerRows.length) {
+					//set flag that first tr shall be ignored
+					ignoreFirstRow=true;
+					// just take first row from this table
+					headerRows = $(this).find('> tbody > tr:first, > tr:first');
+				}
+
+				$.each(headerRows, function(index, row) {
+					var headerTypeIndexesCnt = 0;
+					var matchIndex = -1;
+					var headerCols = $(row).find('> td, > th');
+					
+					$.each(headerCols, function(indexHeaderCol, headerCol) {
+												
+						if(! $(headerCol).hasClass("nosort")){
+						
+						$(headerCol).addClass("sortcol");
+						
+						// extract ids to see if they match
+						for ( var i = 0; i < sortLength; ++i) {
+							if (sortTypes[i] == headerCol.id) {
+								matchIndex = i;
+								break;
+							}
+						}
+						// if no match, extract class names to see if they match
+						if (matchIndex < 0) {
+							for ( var i = 0; i < sortLength; ++i) {
+								if ($(headerCol).hasClass(sortTypes[i])) {
+									matchIndex = i;
+									break;
+								}
+							}
+						}
+						headerTypeIndexes[headerTypeIndexesCnt++] = matchIndex;
+						matchIndex = -1;
+						}else{
+							headerTypeIndexesCnt++
+						}
+					});
+				});
+
+				// get all rows below tbody or table, and maybe skip first one
+			  var rows = $(this).children('tbody').children('tr');
+
+				// pre calcuate search keys
+				// for each column we now calculate a sortKey which is the the text in
+				// uppercase
+				var analyzeFirstRowContent = true;
+				$.each(rows, function(index, row) {
+					var cols = $(row).children('td');
+					var colIndex = 0;
+
+					if(index > 0 || ! ignoreFirstRow){
+						$.each(cols, function(indexCol, col) {
+
+							//if first row with content, check if need to automatic detect type
+							//for any header
+							if(analyzeFirstRowContent){
+								if(headerTypeIndexes[colIndex] < 0 && ! $(col).hasClass("nosort")){
+									//detect type
+									headerTypeIndexes[colIndex] = detectType($(col).text());
+								}
+							}
+							
+							$(row).data('sortKey' + colIndex, formatKey($(col).text(), headerTypeIndexes[colIndex]));
+							
+							colIndex++;
+						});
+						
+						analyzeFirstRowContent=false;
+					}
+				});
+
+				var headCols = headerRows.find('> td, > th');
+				
+				var colIndex = 0;
+				$.each(headCols, function(index, headCol) {
+
+					if (!$(headCol).hasClass('nosort')) {
+
+							$(headCol).bind('click.jqTableKit', function() {
+							
+							var sortAsc=true;
+							if($(headCol).hasClass('sortasc')){
+								cssClassToAdd = 'sortdesc';
+								sortAsc=false;
+							}else{
+								cssClassToAdd = 'sortasc';
+							}
+							
+							//remove sortasc/sortdesc classes
+							headerRows.find('> td, > th').removeClass("sortdesc").removeClass("sortasc");
+							
+							$(headCol).addClass(cssClassToAdd);
+							
+							var closestTable = $(this).closest("table");
+							var trs = closestTable.find('tr');
+							trs.filter(":odd").removeClass("rowodd");
+							trs.filter(":even").removeClass("roweven");
+							
+							if (sortAsc) {
+								closestTable.jqTableKit('sort', function(a, b) {
+									return functionSortTmp(a, b, index);
+								});
+							} else {
+								closestTable.jqTableKit('sort', function(a, b) {
+									return functionSortTmp(b, a, index);
+								});
+							}
+
+							//turn on row striping
+							trs = closestTable.find('tr');
+							trs.filter(":odd").addClass("rowodd");
+							trs.filter(":even").addClass("roweven");
+							trs.filter(":first").removeClass("roweven");
+
+						});
+					}
+					;
+
+				});
+
+				//turn on row striping
+				$(this).find('tr').filter(":odd").addClass("rowodd");
+				$(this).find('tr').filter(":even").addClass("roweven");
+				$(this).find('tr').filter(":first").removeClass("roweven");
+			});
+
+		},
+		destroy : function() {
+
+			return this.each(function() {
+				//remove classes?
+				
+				//remove click handlers, could be optimized to pick out header row
+				$('td').unbind('click.jqTableKit');				
+				$('th').unbind('click.jqTableKit');				
+								
+				var rows = $(this).children('tbody').children('tr');
+
+				//the data is attached to each row, we must however find out how many columns we have to be able to remove the data
+				var processedOne = false;
+				var numberOfCols=0;
+				$.each(rows, function(index, row) {
+					if(! processedOne){
+						var aCol = $(row).find('> td, > th');
+						numberOfCols = aCol.length;
+					}
+					
+					//loop and destroy each sortKey
+					for(var i=0; i<numberOfCols;i++){
+						$(row).removeData('sortKey' +i);
+					};
+				});				
+			})
+		},
+		sort : function(sortMethod) {
+
+			return this.each(function() {
+				// in case someone attach it to some other element
+				if ("table" != this.nodeName.toLowerCase()) {
+					return;
+				}
+
+				// make sure only fetch child tbody tr of "this"
+				var rows = $(this).children('tbody').children('tr');
+
+				rows.sort(sortMethod);
+				$(this).children('tbody').append(rows);
+			});
+		}
+
+	};
+
+	$.fn.jqTableKit = function(method) {
+
+		if (methods[method]) {
+			return methods[method].apply(this, Array.prototype.slice.call(arguments,
+					1));
+		} else if (typeof method === 'object' || !method) {
+			return methods.init.apply(this, arguments);
+		} else {
+			$.error('Method ' + method + ' does not exist on jQuery.jqTableKit');
+		}
+	};
+
+})(jQuery);
+
+$(document).ready(function() {
+	//delay init, since it performs quite many calculations
+	setTimeout("$('table.sortable').jqTableKit()", 100);
+});
