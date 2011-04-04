@@ -16,7 +16,7 @@ You need to include jQuery and the jqTableKit.js, see examples/ for examples.
 At the moment it supports sorting, automatic detection of formats, row striping.
 
 To switch from TableKit to jqTableKit, all you should need to do is just change the inclusion
-<br>of the javascript source files, all the names etc should remain.
+of the javascript source files, all the names etc should remain.
 
 The tables that should be sortable need to have the class
     'sortable'
