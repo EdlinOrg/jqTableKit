@@ -1,6 +1,12 @@
 /*
  * Copyright (c) 2011 Carl Asman http://www.edlin.org/
- * Version: 0.1 2011-04-03
+ * Version: 0.20 2011-04-10
+ * 
+ * TableKit ported to jQuery
+ * (part of a project I have done for a client of mine)
+ * 
+ * You can reach me at www.edlin.org
+ * if you want to contact me regarding potential projects.
  * 
  * jqTableKit's aim is to provide the same functionality, in the same way
  * as TableKit, but using jQuery instead of prototype
@@ -31,6 +37,10 @@
  */
 
 (function($) {
+	
+	var debugLog = function(msg){
+		console.log(msg);
+	}
 	
 	/**
 	 * based on the typeIndex it determines how to format the data
@@ -263,11 +273,58 @@
 												'number': /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/ };
 	var sortLength = sortTypes.length;
 
+	
+	// resize functions 
+	
+	/**
+	 * calculate if the x-value is within the "draggable" area
+	 */
+	var isInDragArea = function (elem, pX){
+		//debugLog("elemLeftBorder="+ (elem.offset().left + elem.outerWidth(true)) + ", pX="+pX);	
+		if( ( elem.offset().left + elem.outerWidth(true) - pX) > 10 ){
+			return false ;
+		}
+		return true;
+	}
+
+	var resizeChangeCursor = function (elem, pX){
+		if( isInDragArea(elem, pX) ){
+			elem.addClass("resize-handle-active");
+			return;
+		};
+		elem.removeClass("resize-handle-active");
+	};
+
+	var resizeHideDiv = function (){
+		if(resizeDiv){
+			$('.resize-handle').remove();
+			resizeDiv=null;
+		}	
+	}
+
+	//resizable vqrs
+	var sortingEnabled=true;
+	var resizeDiv=null;
+	
 	var methods = {
 		init : function(options) {
 
-			return this.each(function() {
+			var settings = {
+				'stripe' : true,
+				'rowEvenClass' : 'roweven',
+				'rowOddClass' : 'rowodd',
+				'minWidth' : 10
+			};
 
+			return this.each(function() {
+				
+				if ( options ) { 
+	        $.extend( settings, options );
+	      }
+
+				var optionSortable=$(this).hasClass('sortable');
+				var optionResizable=$(this).hasClass('resizable');
+				
 				var headerTypeIndexes = [];
 
 				// Determine the types of each row
@@ -281,14 +338,82 @@
 					// just take first row from this table
 					headerRows = $(this).find('> tbody > tr:first, > tr:first');
 				}
+				var headCols = headerRows.find('> td, > th');
 
+				
+				if(optionResizable){
+					//start resize init code
+					headCols.bind('mousemove.jqTableKit_resize', function(e) {
+						resizeChangeCursor($(this), e.pageX);
+					});
+	
+					headCols.bind('mousedown.jqTableKit', function(e) {
+						if( ! isInDragArea($(this), e.pageX) ){
+							return;
+						}
+						var downElement = $(this);
+													
+						//display resize div
+						var pX = e.pageX;
+						if(null === resizeDiv){
+							resizeDiv = $('<div />');
+							var closestTable = downElement.closest("table");								
+							//TODO: find better solution than all elements
+							$('*').addClass('jqTableKitNoneselectable');
+							
+							resizeDiv.addClass('resize-handle').css('top', downElement.offset().top).css('left', pX + 'px').css('height', closestTable.height());			
+															
+							$('body').append(resizeDiv);
+							downElement.addClass("resize-handle-active");
+						}
+	
+						sortingEnabled=false;
+	
+						headCols.unbind('mousemove.jqTableKit_resize');
+														
+						$(document).bind('mousemove.jqTableKit_moveresizediv', function(f) {
+							resizeDiv.css('left', f.pageX + 'px');
+						});
+	
+						$(document).bind('mouseup.jqTableKit', function(e) {						
+							$('*').removeClass('jqTableKitNoneselectable');
+							
+							resizeHideDiv();
+							headCols.removeClass("resize-handle-active");
+													
+							var cellWidth = downElement.outerWidth(true);
+							var change = downElement.offset().left + cellWidth - e.pageX;
+							
+							change = Math.max(settings['minWidth'], downElement.width() - change);
+							downElement.width( change );
+															
+							$(document).unbind('mouseup.jqTableKit');
+							
+							$(document).unbind('mousemove.jqTableKit_moveresizediv');
+							headCols.bind('mousemove.jqTableKit_resize', function(e) {
+								resizeChangeCursor($(this), e.pageX);
+							});
+	
+							//enable click handler
+							sortingEnabled=true;
+						});
+					});						
+					// end resize code
+				}
+				
+				
+				if(! optionSortable){
+					return;
+				}
+				
+				//init sortable code
 				$.each(headerRows, function(index, row) {
 					var headerTypeIndexesCnt = 0;
 					var matchIndex = -1;
 					var headerCols = $(row).find('> td, > th');
 					
 					$.each(headerCols, function(indexHeaderCol, headerCol) {
-												
+							
 						if(! $(headerCol).hasClass("nosort")){
 						
 						$(headerCol).addClass("sortcol");
@@ -349,15 +474,16 @@
 					}
 				});
 
-				var headCols = headerRows.find('> td, > th');
-				
 				var colIndex = 0;
 				$.each(headCols, function(index, headCol) {
 
 					if (!$(headCol).hasClass('nosort')) {
 
 							$(headCol).bind('click.jqTableKit', function() {
-							
+							if(!sortingEnabled){
+								return;
+							}
+
 							var sortAsc=true;
 							if($(headCol).hasClass('sortasc')){
 								cssClassToAdd = 'sortdesc';
@@ -373,8 +499,11 @@
 							
 							var closestTable = $(this).closest("table");
 							var trs = closestTable.find('tr');
-							trs.filter(":odd").removeClass("rowodd");
-							trs.filter(":even").removeClass("roweven");
+							
+							if(settings['stripe']){
+								trs.filter(":odd").removeClass(settings['rowOddClass']);
+								trs.filter(":even").removeClass(settings['rowEvenClass']);
+							}
 							
 							if (sortAsc) {
 								closestTable.jqTableKit('sort', function(a, b) {
@@ -386,22 +515,25 @@
 								});
 							}
 
-							//turn on row striping
-							trs = closestTable.find('tr');
-							trs.filter(":odd").addClass("rowodd");
-							trs.filter(":even").addClass("roweven");
-							trs.filter(":first").removeClass("roweven");
-
+							if(settings['stripe']){
+								//turn on row striping
+								trs = closestTable.find('tr');
+								trs.filter(":odd").addClass(settings['rowOddClass']);
+								trs.filter(":even").addClass(settings['rowEvenClass']);
+								trs.filter(":first").removeClass(settings['rowEvenClass']);
+							}
 						});
 					}
 					;
 
 				});
 
-				//turn on row striping
-				$(this).find('tr').filter(":odd").addClass("rowodd");
-				$(this).find('tr').filter(":even").addClass("roweven");
-				$(this).find('tr').filter(":first").removeClass("roweven");
+				if(settings['stripe']){
+					//turn on row striping
+					$(this).find('tr').filter(":odd").addClass(settings['rowOddClass']);
+					$(this).find('tr').filter(":even").addClass(settings['rowEvenClass']);
+					$(this).find('tr').filter(":first").removeClass(settings['rowEvenClass']);
+				};
 			});
 
 		},
@@ -410,9 +542,16 @@
 			return this.each(function() {
 				//remove classes?
 				
+				//resize cleanup
+				$('th').unbind('.jqTableKit_resize');
+				$('td').unbind('.jqTableKit_resize');
+				$('th').unbind('.jqTableKit');
+				$('td').unbind('.jqTableKit');
+				
+				//sortable cleanup
 				//remove click handlers, could be optimized to pick out header row
-				$('td').unbind('click.jqTableKit');				
-				$('th').unbind('click.jqTableKit');				
+				//$('td').unbind('click.jqTableKit');				
+				//$('th').unbind('click.jqTableKit');				
 								
 				var rows = $(this).children('tbody').children('tr');
 
@@ -430,7 +569,7 @@
 						$(row).removeData('sortKey' +i);
 					};
 				});				
-			})
+			});
 		},
 		sort : function(sortMethod) {
 
@@ -466,5 +605,6 @@
 
 $(document).ready(function() {
 	//delay init, since it performs quite many calculations
-	setTimeout("$('table.sortable').jqTableKit()", 100);
+	setTimeout("$('table').jqTableKit()", 100);
 });
+
