@@ -27,6 +27,9 @@ of the javascript source files, all the names etc should remain.
 Read the TableKit documentation for more detailed information, it works with same class names etc.
 Below is some brief documentation:
 
+The tables that should be resizable need to have the class
+    'resizable'
+
 The tables that should be sortable need to have the class
     'sortable'
 
