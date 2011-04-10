@@ -319,8 +319,8 @@
 			return this.each(function() {
 				
 				if ( options ) { 
-	        $.extend( settings, options );
-	      }
+					$.extend( settings, options );
+				}
 
 				var optionSortable=$(this).hasClass('sortable');
 				var optionResizable=$(this).hasClass('resizable');
@@ -443,7 +443,7 @@
 				});
 
 				// get all rows below tbody or table, and maybe skip first one
-			  var rows = $(this).children('tbody').children('tr');
+				var rows = $(this).children('tbody').children('tr');
 
 				// pre calcuate search keys
 				// for each column we now calculate a sortKey which is the the text in
