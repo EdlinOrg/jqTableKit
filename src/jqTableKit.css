@@ -14,6 +14,10 @@ table.sortable th.sortdesc,table.sortable td.sortdesc {
 	background-color: #B9DDFF;
 }
 
+.sortcol {
+	cursor: pointer;
+}
+
 .jqTableKitNoneselectable {
 	user-select: none;	
 	-moz-user-select: none;
