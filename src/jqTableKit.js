@@ -358,17 +358,18 @@
 						if(null === resizeDiv){
 							resizeDiv = $('<div />');
 							var closestTable = downElement.closest("table");								
+							
+							resizeDiv.addClass('resize-handle').css('top', downElement.offset().top).css('left', pX + 'px').css('height', closestTable.height());			
+															
+							$('body').append(resizeDiv);
+							downElement.addClass("resize-handle-active");
+
 							//TODO: find better solution than all elements
 							if ($.browser.msie) {	
 								$('*').attr('unselectable', 'on');
 							}else{
 								$('*').addClass('jqTableKitNoneselectable');
 							}
-							
-							resizeDiv.addClass('resize-handle').css('top', downElement.offset().top).css('left', pX + 'px').css('height', closestTable.height());			
-															
-							$('body').append(resizeDiv);
-							downElement.addClass("resize-handle-active");
 						}
 	
 						sortingEnabled=false;
@@ -380,11 +381,6 @@
 						});
 	
 						$(document).bind('mouseup.jqTableKit', function(e) {
-							if ($.browser.msie) {	
-								$('*').attr('unselectable', 'off');
-							}else{
-								$('*').removeClass('jqTableKitNoneselectable');
-							}
 							
 							resizeHideDiv();
 							headCols.removeClass("resize-handle-active");
@@ -402,6 +398,12 @@
 								resizeChangeCursor($(this), e.pageX);
 							});
 	
+							if ($.browser.msie) {	
+								$('*').attr('unselectable', 'off');
+							}else{
+								$('*').removeClass('jqTableKitNoneselectable');
+							}
+
 							//enable click handler
 							sortingEnabled=true;
 						});
