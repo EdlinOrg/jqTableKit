@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011 Carl Asman http://www.edlin.org/
- * Version: 0.20 2011-04-10
+ * Version: 0.21 2011-04-11
  * 
  * TableKit ported to jQuery
  * (part of a project I have done for a client of mine)
@@ -359,7 +359,11 @@
 							resizeDiv = $('<div />');
 							var closestTable = downElement.closest("table");								
 							//TODO: find better solution than all elements
-							$('*').addClass('jqTableKitNoneselectable');
+							if ($.browser.msie) {	
+								$('*').attr('unselectable', 'on');
+							}else{
+								$('*').addClass('jqTableKitNoneselectable');
+							}
 							
 							resizeDiv.addClass('resize-handle').css('top', downElement.offset().top).css('left', pX + 'px').css('height', closestTable.height());			
 															
@@ -375,8 +379,12 @@
 							resizeDiv.css('left', f.pageX + 'px');
 						});
 	
-						$(document).bind('mouseup.jqTableKit', function(e) {						
-							$('*').removeClass('jqTableKitNoneselectable');
+						$(document).bind('mouseup.jqTableKit', function(e) {
+							if ($.browser.msie) {	
+								$('*').attr('unselectable', 'off');
+							}else{
+								$('*').removeClass('jqTableKitNoneselectable');
+							}
 							
 							resizeHideDiv();
 							headCols.removeClass("resize-handle-active");
