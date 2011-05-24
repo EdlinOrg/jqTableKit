@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011 Carl Asman http://www.edlin.org/
- * Version: 0.21 2011-04-11
+ * Version: 0.22 2011-05-23
  * 
  * TableKit ported to jQuery
  * (part of a project I have done for a client of mine)
@@ -595,6 +595,13 @@
 				rows.sort(sortMethod);
 				$(this).children('tbody').append(rows);
 			});
+		},
+		/** return array with functions that we want to unit test */
+		unitTestHelper : function( ) {
+			var unitTest = {};
+			unitTest['formatKey'] = formatKey;
+			unitTest['detectType'] = detectType;
+			return unitTest;
 		}
 
 	};
