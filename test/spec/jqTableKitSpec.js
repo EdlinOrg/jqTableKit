@@ -1,8 +1,8 @@
 describe("jqTableKit.formatKey", function() {
-	var formatKey = window.formatKey;  	
 	
   beforeEach(function() {
-
+		unitTestHelper = jQuery.fn.jqTableKit('unitTestHelper');
+		formatKey = unitTestHelper['formatKey'];
   });
 
   it("can convert formatDateIso", function() {
@@ -56,7 +56,10 @@ describe("jqTableKit.formatKey", function() {
 });
 
 describe("jqTableKit.detectType", function() {
-	var detectType = window.detectType;
+  beforeEach(function() {
+		unitTestHelper = jQuery.fn.jqTableKit('unitTestHelper');
+		detectType = unitTestHelper['detectType'];
+  });
 	
   it("can auto detect dateiso", function() {  	
   	expect(detectType("2005-03-26T19:51:34Z") + "").toEqual("0");
