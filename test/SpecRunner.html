@@ -8,7 +8,7 @@
   <script type="text/javascript" src="lib/jasmine-1.0.2/jasmine-html.js"></script>
 
   <!-- include source files here... -->
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
   <script type="text/javascript" src="../src/jqTableKit.js"></script>
 
   <!-- include spec files here... -->
@@ -18,20 +18,11 @@
 <body>
 
 <script type="text/javascript">
+$(document).ready(function () {
   jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
   jasmine.getEnv().execute();
+});
 </script>
 
-
-<pre>
-Note: since the unit tests are testing private functions directly,
-you have to remove "var" in front of the functions in jqTableKit
-to be able to execute the unit tests
-
-e.g.
- var detectType = function(data){
-needs to be modfied to
- detectType = function(data){
-</pre>
 </body>
 </html>
