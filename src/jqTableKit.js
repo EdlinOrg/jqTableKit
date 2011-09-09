@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011 Carl Asman http://www.edlin.org/
- * Version: 0.22 2011-05-23
+ * Version: 0.23 2011-09-09
  * 
  * TableKit ported to jQuery
  * (part of a project I have done for a client of mine)
@@ -620,8 +620,8 @@
 
 })(jQuery);
 
-$(document).ready(function() {
+jQuery(document).ready(function() {
 	//delay init, since it performs quite many calculations
-	setTimeout("$('table').jqTableKit()", 100);
+	setTimeout(function(){jQuery('table').jqTableKit();}, 100);
 });
 
