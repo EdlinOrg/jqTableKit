@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011 Carl Asman http://www.edlin.org/
- * Version: 0.23 2011-09-09
+ * Version: 0.24 2011-11-28
  * 
  * TableKit ported to jQuery
  * (part of a project I have done for a client of mine)
@@ -426,26 +426,26 @@
 							
 						if(! $(headerCol).hasClass("nosort")){
 						
-						$(headerCol).addClass("sortcol");
-						
-						// extract ids to see if they match
-						for ( var i = 0; i < sortLength; ++i) {
-							if (sortTypes[i] == headerCol.id) {
-								matchIndex = i;
-								break;
-							}
-						}
-						// if no match, extract class names to see if they match
-						if (matchIndex < 0) {
+							$(headerCol).addClass("sortcol");
+							
+							// extract ids to see if they match
 							for ( var i = 0; i < sortLength; ++i) {
-								if ($(headerCol).hasClass(sortTypes[i])) {
+								if (sortTypes[i] == headerCol.id) {
 									matchIndex = i;
 									break;
 								}
 							}
-						}
-						headerTypeIndexes[headerTypeIndexesCnt++] = matchIndex;
-						matchIndex = -1;
+							// if no match, extract class names to see if they match
+							if (matchIndex < 0) {
+								for ( var i = 0; i < sortLength; ++i) {
+									if ($(headerCol).hasClass(sortTypes[i])) {
+										matchIndex = i;
+										break;
+									}
+								}
+							}
+							headerTypeIndexes[headerTypeIndexesCnt++] = matchIndex;
+							matchIndex = -1;
 						}else{
 							headerTypeIndexesCnt++
 						}
@@ -516,11 +516,11 @@
 							}
 							
 							if (sortAsc) {
-								closestTable.jqTableKit('sort', function(a, b) {
+								closestTable.jqTableKit('sort', ignoreFirstRow, function(a, b) {
 									return functionSortTmp(a, b, index);
 								});
 							} else {
-								closestTable.jqTableKit('sort', function(a, b) {
+								closestTable.jqTableKit('sort', ignoreFirstRow, function(a, b) {
 									return functionSortTmp(b, a, index);
 								});
 							}
@@ -581,7 +581,7 @@
 				});				
 			});
 		},
-		sort : function(sortMethod) {
+		sort : function(ignoreFirstRow, sortMethod) {
 
 			return this.each(function() {
 				// in case someone attach it to some other element
@@ -590,8 +590,15 @@
 				}
 
 				// make sure only fetch child tbody tr of "this"
-				var rows = $(this).children('tbody').children('tr');
+				var rows;
 
+				if(ignoreFirstRow){
+					// make sure only fetch child tbody tr of "this"
+					rows = $(this).children('tbody').children('tr').not(':first');
+				}else{
+					rows = $(this).children('tbody').children('tr');
+				}
+				
 				rows.sort(sortMethod);
 				$(this).children('tbody').append(rows);
 			});
