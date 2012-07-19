@@ -28,31 +28,31 @@ Read the TableKit documentation for more detailed information, it works with sam
 Below is some brief documentation:
 
 The tables that should be resizable need to have the class
-    'resizable'
+* 'resizable'
 
 The tables that should be sortable need to have the class
-    'sortable'
+* 'sortable'
 
 These classes are used for the tr tags, define the colors for these classes for row striping
-    'roweven' css class used for row striping
-    'rowodd'  css class used for row striping
+* 'roweven' css class used for row striping
+* 'rowodd'  css class used for row striping
 
 css class for the column header or first row in table:
-    'nosort' - the column will have no sorting activated
-    'sortfirstasc' - sort the table on init by this column (ascending)
-    'sortfirstdesc' - sort the table on init by this column (descending)
+* 'nosort' - the column will have no sorting activated
+* 'sortfirstasc' - sort the table on init by this column (ascending)
+* 'sortfirstdesc' - sort the table on init by this column (descending)
 
 css classes/ids for the column headers, these determine what kind of content are in the columns
-    'date-iso'          e.g. 2005-03-26T19:51:34Z
-    'date'              e.g. Mon, 18 Dec 1995 17:28:35 GMT
-    'date-eu'           e.g. 25-12-2006
-    'date-au'           e.g. 25/12/2006 05:30:00 PM
-    'time'              e.g. 05:30:00 PM
-    'currency'          e.g. $55.00 - detects: $ £ ¥ € ¤
-    'datasize'          e.g. 30MB - detects: B, KB, MB, GB, TB
-    'number'            e.g. 12.4, -13.0
-    'casesensitivetext'
-    'text'
+* 'date-iso'          e.g. 2005-03-26T19:51:34Z
+* 'date'              e.g. Mon, 18 Dec 1995 17:28:35 GMT
+* 'date-eu'           e.g. 25-12-2006
+* 'date-au'           e.g. 25/12/2006 05:30:00 PM
+* 'time'              e.g. 05:30:00 PM
+* 'currency'          e.g. $55.00 - detects: $ £ ¥ € ¤
+* 'datasize'          e.g. 30MB - detects: B, KB, MB, GB, TB
+* 'number'            e.g. 12.4, -13.0
+* 'casesensitivetext'
+* 'text'
 
 if no recognized class/id is found, it will try to auto detect the format in the order of
 the css classes listed above.
