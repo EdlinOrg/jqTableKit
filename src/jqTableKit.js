@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2011 Carl Asman http://www.edlin.org/
- * Version: 0.24 2011-11-28
+ * Copyright (c) 2011-2012 Carl Asman http://www.edlin.org/
+ * Version: 0.25 2012-07-19
  * 
  * TableKit ported to jQuery
  * (part of a project I have done for a client of mine)
@@ -425,7 +425,7 @@
 					$.each(headerCols, function(indexHeaderCol, headerCol) {
 							
 						if(! $(headerCol).hasClass("nosort")){
-						
+
 							$(headerCol).addClass("sortcol");
 							
 							// extract ids to see if they match
@@ -484,12 +484,22 @@
 					}
 				});
 
+				var preSortAsc=null;
+				var preSortDesc=null;
 				var colIndex = 0;
 				$.each(headCols, function(index, headCol) {
 
 					if (!$(headCol).hasClass('nosort')) {
 
-							$(headCol).bind('click.jqTableKit', function() {
+						if( $(headCol).hasClass("sortfirstasc") ){
+							preSortAsc=$(headCol);
+						}else{
+							if( $(headCol).hasClass("sortfirstdesc") ){
+								preSortDesc=$(headCol);
+							}
+						}
+
+						$(headCol).bind('click.jqTableKit', function() {
 							if(!sortingEnabled){
 								return;
 							}
@@ -533,9 +543,7 @@
 								trs.filter(":first").removeClass(settings['rowEvenClass']);
 							}
 						});
-					}
-					;
-
+					};
 				});
 
 				if(settings['stripe']){
@@ -544,6 +552,15 @@
 					$(this).find('tr').filter(":even").addClass(settings['rowEvenClass']);
 					$(this).find('tr').filter(":first").removeClass(settings['rowEvenClass']);
 				};
+				
+				if(preSortAsc){
+					preSortAsc.removeClass('sortasc').removeClass('sortdesc').addClass('sortdesc').click();
+				}else{
+					if(preSortDesc){
+						preSortDesc.removeClass('sortasc').removeClass('sortdesc').addClass('sortasc').click();
+					}
+				}
+					
 			});
 
 		},

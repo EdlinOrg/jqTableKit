@@ -39,6 +39,8 @@ These classes are used for the tr tags, define the colors for these classes for 
 
 css class for the column header or first row in table:
     'nosort' - the column will have no sorting activated
+    'sortfirstasc' - sort the table on init by this column (ascending)
+    'sortfirstdesc' - sort the table on init by this column (descending)
 
 css classes/ids for the column headers, these determine what kind of content are in the columns
     'date-iso'          e.g. 2005-03-26T19:51:34Z
