@@ -5,7 +5,7 @@ TableKit (subset) ported to jQuery (part of a project I have done for a client o
 You can reach me at www.edlin.org if you want to get in touch regarding potential projects.
 
 You can see a small demo of the plugin at:
-<a href="http://blog.edlin.org/tablekit-for-jquery-jqtablekit">http://blog.edlin.org/tablekit-for-jquery-jqtablekit</a>
+<a href="http://www.edlin.org/computing/tablekit-for-jquery-jqtablekit.html">http://www.edlin.org/computing/tablekit-for-jquery-jqtablekit.html</a>
 
 The original TableKit uses prototype to provide table sorting, resizing, editing in html,
 see <a href="http://millstream.com.au/view/code/tablekit">http://millstream.com.au/view/code/tablekit</a>
