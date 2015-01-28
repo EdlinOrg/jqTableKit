@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2011-2012 Carl Asman http://www.edlin.org/
- * Version: 0.25 2012-07-19
+ * Copyright (c) 2011-2015 Carl Asman http://www.edlin.org/
  * 
  * TableKit ported to jQuery
  * (part of a project I have done for a client of mine)

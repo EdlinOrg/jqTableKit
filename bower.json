@@ -1,0 +1,7 @@
+{
+  "name": "jqTableKit",
+  "main": "src/jqTableKit.js",
+  "dependencies": {
+    "jquery": "latest"
+  }
+}
