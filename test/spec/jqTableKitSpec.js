@@ -45,6 +45,17 @@ describe("jqTableKit.formatKey", function() {
   	
   	expect(formatKey("nodate",typeId) + "").toEqual("0");
   });
+
+  it("can convert date us", function() {
+    var indata = "12/25/2006 05:30:00 PM";
+    var typeId = 10;
+    var tmp = formatKey(indata,typeId);   
+    var d = new Date(tmp);   
+    expect(d.getFullYear() +"").toEqual("2006")
+    expect(d.getMonth() + "").toEqual("11")
+    
+    expect(formatKey("nodate",typeId) + "").toEqual("0");
+  });
   
   it("can convert currency", function() {
   	var tmp = formatKey("1999€",5);  	

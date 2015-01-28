@@ -87,6 +87,9 @@
 			return data;
 		case 9:
 			return data.toUpperCase();
+		case 10:
+			// date-us
+			return formatDateUs(data);
 		default:
 			return 0;
 		}
@@ -101,6 +104,18 @@
 		var yr_num = r[3];
 		var mo_num = parseInt(r[2], 10) - 1;
 		var day_num = r[1];
+		return new Date(yr_num, mo_num, day_num).valueOf();
+	}
+
+	var formatDateUs = function(v) {
+		var pattern = /^\d{1,2}(-|\/)\d{1,2}(-|\/)\d{4}/i; //12-31-1999, 12/31/1999
+		if (!v.match(pattern)) {
+			return 0;
+		}
+		var r = v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+		var yr_num = r[3];
+		var mo_num = parseInt(r[1], 10) - 1;
+		var day_num = r[2];
 		return new Date(yr_num, mo_num, day_num).valueOf();
 	}
 
@@ -261,7 +276,7 @@
 	}
 		
 	// determine the header type for each column
-	var sortTypes = [ 'date-iso', 'date', 'date-eu', 'date-au', 'time', 'currency', 'datasize', 'number', 'casesensitivetext', 'text' ];
+	var sortTypes = [ 'date-iso', 'date', 'date-eu', 'date-au', 'time', 'currency', 'datasize', 'number', 'casesensitivetext', 'text', 'date-us' ];
 	//pattern used for automatic detections
 	var typePatterns = {	'date-iso' : /[\d]{4}-[\d]{2}-[\d]{2}(?:T[\d]{2}\:[\d]{2}(?:\:[\d]{2}(?:\.[\d]+)?)?(Z|([-+][\d]{2}:[\d]{2})?)?)?/, // 2005-03-26T19:51:34Z
 												'date': /^(?:sun|mon|tue|wed|thu|fri|sat)\,\s\d{1,2}\s(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s\d{4}(?:\s\d{2}\:\d{2}(?:\:\d{2})?(?:\sGMT(?:[+-]\d{4})?)?)?/i, //Mon, 18 Dec 1995 17:28:35 GMT
@@ -270,7 +285,8 @@
 												'time': /^\d{1,2}\:\d{2}(?:\:\d{2})?(?:\s[a|p]m)?$/i,
 												'currency': /(^[$¥£€¤])|([€]$)/, // dollar,pound,yen,euro,generic currency symbol
 												'datasize': /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?\s?[k|m|g|t]b$/i, 
-												'number': /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/ };
+												'number': /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/,
+												'date-us': /^\d{1,2}-\d{1,2}-\d{4}/};
 	var sortLength = sortTypes.length;
 
 	
