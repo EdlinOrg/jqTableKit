@@ -1,5 +1,5 @@
 {
-  "name": "jqTableKit",
+  "name": "jqtablekit",
   "main": "src/jqTableKit.js",
   "dependencies": {
     "jquery": "latest"
